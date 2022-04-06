@@ -28,4 +28,4 @@ enum MONTH{
 struct _DayOfMonth{
 	char name[5];	
 	uint16_t lengthOfDay;
-}DayOfMonth, pDayOfMonth;
+}DayOfMonth, PDayOfMonth;
