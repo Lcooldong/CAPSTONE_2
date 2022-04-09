@@ -2,14 +2,17 @@
 #define __MCP2515_H
 
 #pragma anon_unions
-#include "stm32f4_hal.h"
+#include "stm32f4xx_hal.h"
+#include "main.h"
+//#include "stdbool.h"
+
 
 
 /* MCP2515 SPI Instruction SET */
 #define MCP2515_RESET						0xC0
 
 #define MCP2515_READ						0x03
-#define MCP2515_READ_RXD0SIDH		0x90
+#define MCP2515_READ_RXB0SIDH		0x90
 #define MCP2515_READ_RXB0D0			0x92
 #define MCP2515_READ_RXB1SIDH		0x94
 #define MCP2515_READ_RXB1D0			0x96
@@ -68,7 +71,7 @@
 #define MCP2515_RXM1SIDH				0x24
 #define MCP2515_RXM1SIDL				0x25
 #define MCP2515_RXM1EID8				0x26
-#define MCP2515_RXMiEID0				0x27
+#define MCP2515_RXM1EID0				0x27
 #define MCP2515_CNF3						0x28
 #define MCP2515_CNF2						0x29
 #define MCP2515_CNF1						0x2A
@@ -216,7 +219,7 @@ typedef struct{
 	uint8_t RXM1SIDL;
 	uint8_t RXM1EID8;
 	uint8_t RXM1EID0;
-}RXM0;
+}RXM1;
 
 
 typedef struct{
