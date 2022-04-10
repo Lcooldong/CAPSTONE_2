@@ -28,7 +28,8 @@ typedef union{
 #define OSC_8MHZ	0
 #define OSC_16MHZ	1
 
-bool CANSPI_Initialize(uint8_t OSC_HZ);
+
+bool CANSPI_Initialize(uint8_t OSC_HZ, uint16_t kpbs);
 void CANSPI_Sleep(void);
 uint8_t CANSPI_Transmit(uCAN_MSG *tempCanMsg);
 uint8_t CANSPI_Receive(uCAN_MSG *tempCanMsg);

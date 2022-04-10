@@ -1,3 +1,4 @@
+#include "stdio.h"
 #include "CANSPI.h"
 #include "MCP2515.h"
 
@@ -28,8 +29,9 @@ void CANSPI_Sleep(void)
 
 
 /* Initialize CAN Communication */
-bool CANSPI_Initialize(uint8_t OSC_HZ)
+bool CANSPI_Initialize(uint8_t OSC_HZ, uint16_t kbps)
 {
+
 	RXF0 RXF0reg;
 	RXF1 RXF1reg;
 	RXF2 RXF2reg;
@@ -105,7 +107,10 @@ bool CANSPI_Initialize(uint8_t OSC_HZ)
 	MCP2515_WriteByte(MCP2515_RXB0CTRL, 0x04);	// Enable BUKT, Accept Filter 0
 	MCP2515_WriteByte(MCP2515_RXB1CTRL, 0x01);	// Accept Filter 1
 
+	
+	
 
+	
 //#ifdef OSC_16MHZ	
 	if(OSC_HZ == OSC_16MHZ){
 		
@@ -116,6 +121,12 @@ bool CANSPI_Initialize(uint8_t OSC_HZ)
 	* tbit = 1tq + 5tq + 6tq + 4tq = 16tq
   */
 	
+	// minimum 5 tq, maximun 25 tq	
+	if((kbps >= 320) && (kbps <= 1000))
+	{
+		
+	}
+		
 	/* 00(SJW 1tq) 000000 */  
   MCP2515_WriteByte(MCP2515_CNF1, 0x00);
   
@@ -136,14 +147,49 @@ bool CANSPI_Initialize(uint8_t OSC_HZ)
 	@ tbit = 1tq + 2tq + 2tq + 3tq
 	*/
 	
-	/* 00(SJW 1tq) 000 000 */
-	MCP2515_WriteByte(MCP2515_CNF1, 0x00);
+		
+	const double tq_8MHZ = 0.00000025;		// 0.25us
+	const double KHZ			= 0.001;				// 1 ms
+	const	uint16_t KHZPER8MHZ	= (uint16_t)KHZ/tq_8MHZ;			// 4000	
+		
+	// minimum 5 tq, maximun 25 tq	
+	if((kbps >= 160) && (kbps <= 800))
+	{
+		uint16_t numberOftq	= (uint16_t)KHZPER8MHZ/kbps;	// Number of TimeQuantum
+		
+		uint16_t samplePoint = (uint16_t)numberOftq * 0.7;
+		
+		uint16_t PS2_tq = numberOftq - samplePoint;
+		
+		
+		
+		
+		/* 00 (SJW 1tq) 000 000 */
+		MCP2515_WriteByte(MCP2515_CNF1, 0x00);
+		
+		/* 1 1 PS1(3 bits) PROP(3 bits) */
+		MCP2515_WriteByte(MCP2515_CNF2, 0xC9);
 	
-	/* 1 1 001(2tq) 001(2tq) */
-	MCP2515_WriteByte(MCP2515_CNF2, 0xC9);
+		/* 1 0 000 PS2(3 bits) */
+		MCP2515_WriteByte(MCP2515_CNF3, 0x82);
+		
+	}
+	else
+	{
+		printf("out of range : default 500 kbps (reset between 160~800) \r\n");
+		
+		/* Default 500kbps */
+		
+		/* 00(SJW 1tq) 000 000	(Baud Rate Prescaler = 0) */
+		MCP2515_WriteByte(MCP2515_CNF1, 0x00);
 	
-	/* 1 0 000 010 (3tq) */
-	MCP2515_WriteByte(MCP2515_CNF3, 0x82);
+		/* 1 1 001(2tq) 001(2tq) */
+		MCP2515_WriteByte(MCP2515_CNF2, 0xC9);
+	
+		/* 1 0 000 010 (3tq) */
+		MCP2515_WriteByte(MCP2515_CNF3, 0x82);
+	}		
+
 
 //#endif
 	}
