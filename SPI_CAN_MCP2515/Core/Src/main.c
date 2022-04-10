@@ -50,6 +50,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint32_t cnt = 0;
 uCAN_MSG txMessage;
 uCAN_MSG rxMessage;
 /* USER CODE END PV */
@@ -126,14 +127,14 @@ int main(void)
   MX_SPI3_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-	CANSPI_Initialize(OSC_8MHZ);
+	CANSPI_Initialize(OSC_8MHZ, 500);	// OSC, kbps
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	
 	txMessage.frame.idType = dSTANDARD_CAN_MSG_ID_2_0B;
-	txMessage.frame.id = 0x0A;
+	txMessage.frame.id = 0x00A;
 	txMessage.frame.dlc = 8;
 	txMessage.frame.data0 = 0;
 	txMessage.frame.data1 = 1;
@@ -142,18 +143,48 @@ int main(void)
 	txMessage.frame.data4 = 4;
 	txMessage.frame.data5 = 5;
 	txMessage.frame.data6 = 6;
-	txMessage.frame.data7 = 7;
+	txMessage.frame.data7 = 8;
 	
+	
+	
+	// M0 -> F0, F1
+	// M1 -> F2, F3, F4, F5
+	//CANSPI_SetFilterMask(0, 0x7E7, 0, 0x1EF);
+	CANSPI_SetFilterMask(0, 0, 0, 0x1EF);
 	
   while (1)
   {
 		if(CANSPI_Receive(&rxMessage))
 		{
 			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-			//printf("%s\r\n", "Message Arrived");
+			printf("%s\r\n", "Message Arrived");
 			//sprintf();
+			
+			
+			printf("%x\r\n", rxMessage.frame.idType);
+			printf("%x\r\n", rxMessage.frame.id);
+			printf("%x\r\n", rxMessage.frame.data0);
+			printf("%x\r\n", rxMessage.frame.data1);
+			printf("%x\r\n", rxMessage.frame.data2);
+			printf("%x\r\n", rxMessage.frame.data3);
+			printf("%x\r\n", rxMessage.frame.data4);
+			printf("%x\r\n", rxMessage.frame.data5);
+			printf("%x\r\n", rxMessage.frame.data6);
+			printf("%x\r\n", rxMessage.frame.data7);
+			
+			printf("==========================\r\n");
+			if(rxMessage.frame.idType == dSTANDARD_CAN_MSG_ID_2_0B)
+				printf("ID Type : standard\r\n");
+			else if(rxMessage.frame.idType == dEXTENDED_CAN_MSG_ID_2_0B)
+				printf("ID Type : extended\r\n");
+			for(int i =1; i < sizeof(rxMessage.dataArray); i++)
+			{
+				printf("0x%x\r\n", (uint32_t)(rxMessage.dataArray[i]));
+			}
+			printf("==========================\r\n");
+			
 		}
-		printf("hello\r\n");
+		//printf("hello\r\n");
 		HAL_Delay(1000);
     /* USER CODE END WHILE */
 
@@ -212,6 +243,20 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+	for(int i =0; i < sizeof(rxMessage.array); i++)
+	{
+		printf("0x%u\r\n", rxMessage.array[i]);
+	}
+	//uint8_t tempBuffer[100];
+	//int result = 0;
+	//result = sprintf((char*)tempBuffer, "%u\r\n", rxMessage.frame.idType);
+	//result += sprintf((char*)tempBuffer - sizeof(rxMessage.frame.idType), "%u\r\n", rxMessage.frame.idType);
+	//if(result > 0) printf("%s\r\n", tempBuffer);
+	//else printf("SPI receive error\r\n");
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	static uint32_t temp = 0;
@@ -220,6 +265,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		if(HAL_GetTick() - temp > 100){
 			printf("%s\r\n", "PIN_10 Pressed");
 			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+			txMessage.frame.data7 = 8 + cnt;
+			cnt++;
 			
 			CANSPI_Transmit(&txMessage);
 		}

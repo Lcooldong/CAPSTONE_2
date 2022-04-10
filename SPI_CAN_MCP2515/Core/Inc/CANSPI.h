@@ -20,6 +20,7 @@ typedef union{
 		uint8_t data7;
 	} frame;
 	uint8_t array[14];
+	uint8_t dataArray[11];
 }uCAN_MSG;
 
 #define dSTANDARD_CAN_MSG_ID_2_0B 1
@@ -30,6 +31,7 @@ typedef union{
 
 
 bool CANSPI_Initialize(uint8_t OSC_HZ, uint16_t kpbs);
+uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filterNumber, uint32_t filterID);
 void CANSPI_Sleep(void);
 uint8_t CANSPI_Transmit(uCAN_MSG *tempCanMsg);
 uint8_t CANSPI_Receive(uCAN_MSG *tempCanMsg);

@@ -36,3 +36,5 @@ spi_can_mcp2515\canspi.o: ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_
 spi_can_mcp2515\canspi.o: ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h
 spi_can_mcp2515\canspi.o: ..\Core\Inc\main.h
 spi_can_mcp2515\canspi.o: ..\Core\Inc\MCP2515.h
+spi_can_mcp2515\canspi.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+spi_can_mcp2515\canspi.o: ..\Core\Inc\usart.h
