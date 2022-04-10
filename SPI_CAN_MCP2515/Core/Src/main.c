@@ -150,7 +150,7 @@ int main(void)
 	// M0 -> F0, F1
 	// M1 -> F2, F3, F4, F5
 	//CANSPI_SetFilterMask(0, 0x7E7, 0, 0x1EF);
-	CANSPI_SetFilterMask(0, 0, 0, 0x1EF);
+	CANSPI_SetFilterMask(0, 0, 0, 0);
 	
   while (1)
   {
@@ -161,25 +161,31 @@ int main(void)
 			//sprintf();
 			
 			
+			printf("%d\r\n", rxMessage.frame.idType);
 			printf("%x\r\n", rxMessage.frame.idType);
+			printf("%u\r\n", rxMessage.frame.id);
 			printf("%x\r\n", rxMessage.frame.id);
-			printf("%x\r\n", rxMessage.frame.data0);
-			printf("%x\r\n", rxMessage.frame.data1);
-			printf("%x\r\n", rxMessage.frame.data2);
-			printf("%x\r\n", rxMessage.frame.data3);
-			printf("%x\r\n", rxMessage.frame.data4);
-			printf("%x\r\n", rxMessage.frame.data5);
-			printf("%x\r\n", rxMessage.frame.data6);
-			printf("%x\r\n", rxMessage.frame.data7);
+			printf("0x%02x\r\n", rxMessage.frame.data0);
+			printf("0x%02x\r\n", rxMessage.frame.data1);
+			printf("0x%02x\r\n", rxMessage.frame.data2);
+			printf("0x%02x\r\n", rxMessage.frame.data3);
+			printf("0x%02x\r\n", rxMessage.frame.data4);
+			printf("0x%02x\r\n", rxMessage.frame.data5);
+			printf("0x%02x\r\n", rxMessage.frame.data6);
+			printf("0x%02x\r\n", rxMessage.frame.data7);
 			
 			printf("==========================\r\n");
-			if(rxMessage.frame.idType == dSTANDARD_CAN_MSG_ID_2_0B)
+			if(rxMessage.frame.idType == (uint8_t)dSTANDARD_CAN_MSG_ID_2_0B)
 				printf("ID Type : standard\r\n");
-			else if(rxMessage.frame.idType == dEXTENDED_CAN_MSG_ID_2_0B)
+			else if(rxMessage.frame.idType == (uint8_t)dEXTENDED_CAN_MSG_ID_2_0B)
 				printf("ID Type : extended\r\n");
-			for(int i =1; i < sizeof(rxMessage.dataArray); i++)
+			
+			printf("ID  : %x\r\n", rxMessage.frame.id);
+			printf("DLC : %d\r\n", rxMessage.frame.dlc);
+			
+			for(int i =0; i < sizeof(rxMessage.dataArray); i++)
 			{
-				printf("0x%x\r\n", (uint32_t)(rxMessage.dataArray[i]));
+				printf("Data-%d : 0x%02x\r\n", i, rxMessage.dataArray[i]);
 			}
 			printf("==========================\r\n");
 			

@@ -10,7 +10,7 @@ extern UART_HandleTypeDef huart3;
 
 /* Local Function Prototypes */
 static uint32_t convertReg2ExtendedCANid(uint8_t tempRXBn_EIDH, uint8_t tempRXBn_EIDL, uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL);
-static uint32_t convertReg2StandardCANid(uint16_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL);
+static uint32_t convertReg2StandardCANid(uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL);
 static void convertCANid2Reg(uint32_t tempPassedInID, uint8_t canIdType, id_reg_t *passedIdReg);
 
 /* Local Variables */
@@ -547,6 +547,13 @@ uint8_t CANSPI_Receive(uCAN_MSG *tempCanMsg)
 			tempCanMsg->frame.id		 = convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL);
 		}
 		
+		printf("%u\r\n", tempCanMsg->frame.idType);
+		printf("RXBnSIDH : %x\r\n", rxReg.RXBnSIDH);
+		printf("RXBnSIDL : %x\r\n", rxReg.RXBnSIDL);
+		printf("%u\r\n", convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL));
+		printf("%x\r\n", convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL));
+		printf("%x\r\n", tempCanMsg->frame.id);
+		
 		tempCanMsg->frame.dlc		= rxReg.RXBnDLC;
 		tempCanMsg->frame.data0 = rxReg.RXBnD0;
 		tempCanMsg->frame.data1 = rxReg.RXBnD1;
@@ -557,17 +564,15 @@ uint8_t CANSPI_Receive(uCAN_MSG *tempCanMsg)
 		tempCanMsg->frame.data6 = rxReg.RXBnD6;
 		tempCanMsg->frame.data7 = rxReg.RXBnD7;
 		
-		tempCanMsg->dataArray[0] = tempCanMsg->frame.idType;
-		tempCanMsg->dataArray[1] = tempCanMsg->frame.id;
-		tempCanMsg->dataArray[2] = tempCanMsg->frame.dlc;
-		tempCanMsg->dataArray[3] = tempCanMsg->frame.data0;
-		tempCanMsg->dataArray[4] = tempCanMsg->frame.data1;
-		tempCanMsg->dataArray[5] = tempCanMsg->frame.data2;
-		tempCanMsg->dataArray[6] = tempCanMsg->frame.data3;
-		tempCanMsg->dataArray[7] = tempCanMsg->frame.data4;
-		tempCanMsg->dataArray[8] = tempCanMsg->frame.data5;
-		tempCanMsg->dataArray[9] = tempCanMsg->frame.data6;
-		tempCanMsg->dataArray[10] = tempCanMsg->frame.data7;
+
+		tempCanMsg->dataArray[0] = tempCanMsg->frame.data0;
+		tempCanMsg->dataArray[1] = tempCanMsg->frame.data1;
+		tempCanMsg->dataArray[2] = tempCanMsg->frame.data2;
+		tempCanMsg->dataArray[3] = tempCanMsg->frame.data3;
+		tempCanMsg->dataArray[4] = tempCanMsg->frame.data4;
+		tempCanMsg->dataArray[5] = tempCanMsg->frame.data5;
+		tempCanMsg->dataArray[6] = tempCanMsg->frame.data6;
+		tempCanMsg->dataArray[7] = tempCanMsg->frame.data7;
 
 		returnValue = 1;
 	}
@@ -671,13 +676,16 @@ static uint32_t convertReg2ExtendedCANid(uint8_t tempRXBn_EIDH, uint8_t tempRXBn
 
 
 /* Register -> 11 bits Standard ID */
-static uint32_t convertReg2StandardCANid(uint16_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL)
+static uint32_t convertReg2StandardCANid(uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL)
 {
 	uint32_t returnValue = 0;
 	uint32_t ConvertedID;
 	
 	ConvertedID = (tempRXBn_SIDH << 3);
+	//printf("%x\r\n", ConvertedID);
+	
 	ConvertedID = ConvertedID + (tempRXBn_SIDL >> 5);
+	//printf("%x\r\n", ConvertedID);
 	returnValue = ConvertedID;
 	
 	return (returnValue);
