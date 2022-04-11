@@ -53,6 +53,7 @@
 uint32_t cnt = 0;
 uCAN_MSG txMessage;
 uCAN_MSG rxMessage;
+uint8_t ReceiveDataArray[8];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -149,11 +150,14 @@ int main(void)
 	
 	// M0 -> F0, F1
 	// M1 -> F2, F3, F4, F5
-	//CANSPI_SetFilterMask(0, 0x7E7, 0, 0x1EF);
-	CANSPI_SetFilterMask(0, 0, 0, 0);
+	// maskNumber, maskID, filterNumber, filterID
+	CANSPI_SetMaskFilter(0, 0x7E7, 0, 0x1EF);	// RXB0 -> RXB1 Rollover Enable
+	CANSPI_SetMaskFilter(1, 0x7E7, 2, 0x1EF);	
+	//CANSPI_SetMaskFilter(0, 0, 0, 0);
 	
   while (1)
   {
+		/*
 		if(CANSPI_Receive(&rxMessage))
 		{
 			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
@@ -183,14 +187,14 @@ int main(void)
 			printf("ID  : %x\r\n", rxMessage.frame.id);
 			printf("DLC : %d\r\n", rxMessage.frame.dlc);
 			
-			for(int i =0; i < sizeof(rxMessage.dataArray); i++)
+			for(int i =0; i < sizeof(ReceiveDataArray); i++)
 			{
-				printf("Data-%d : 0x%02x\r\n", i, rxMessage.dataArray[i]);
+				printf("Data-%d : 0x%02x\r\n", i, ReceiveDataArray[i]);
 			}
 			printf("==========================\r\n");
 			
 		}
-		//printf("hello\r\n");
+		*/
 		HAL_Delay(1000);
     /* USER CODE END WHILE */
 
@@ -251,16 +255,42 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-	for(int i =0; i < sizeof(rxMessage.array); i++)
-	{
-		printf("0x%u\r\n", rxMessage.array[i]);
-	}
-	//uint8_t tempBuffer[100];
-	//int result = 0;
-	//result = sprintf((char*)tempBuffer, "%u\r\n", rxMessage.frame.idType);
-	//result += sprintf((char*)tempBuffer - sizeof(rxMessage.frame.idType), "%u\r\n", rxMessage.frame.idType);
-	//if(result > 0) printf("%s\r\n", tempBuffer);
-	//else printf("SPI receive error\r\n");
+	if(CANSPI_Receive(&rxMessage))
+		{
+			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+			printf("%s\r\n", "Message Arrived");
+			//sprintf();
+			
+			
+			printf("%d\r\n", rxMessage.frame.idType);
+			printf("%x\r\n", rxMessage.frame.idType);
+			printf("%u\r\n", rxMessage.frame.id);
+			printf("%x\r\n", rxMessage.frame.id);
+			printf("0x%02x\r\n", rxMessage.frame.data0);
+			printf("0x%02x\r\n", rxMessage.frame.data1);
+			printf("0x%02x\r\n", rxMessage.frame.data2);
+			printf("0x%02x\r\n", rxMessage.frame.data3);
+			printf("0x%02x\r\n", rxMessage.frame.data4);
+			printf("0x%02x\r\n", rxMessage.frame.data5);
+			printf("0x%02x\r\n", rxMessage.frame.data6);
+			printf("0x%02x\r\n", rxMessage.frame.data7);
+			
+			printf("==========================\r\n");
+			if(rxMessage.frame.idType == (uint8_t)dSTANDARD_CAN_MSG_ID_2_0B)
+				printf("ID Type : standard\r\n");
+			else if(rxMessage.frame.idType == (uint8_t)dEXTENDED_CAN_MSG_ID_2_0B)
+				printf("ID Type : extended\r\n");
+			
+			printf("ID  : %x\r\n", rxMessage.frame.id);
+			printf("DLC : %d\r\n", rxMessage.frame.dlc);
+			
+			for(int i =0; i < sizeof(ReceiveDataArray); i++)
+			{
+				printf("Data-%d : 0x%02x\r\n", i, ReceiveDataArray[i]);
+			}
+			printf("==========================\r\n");
+			
+		}
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)

@@ -5,6 +5,7 @@
 #include "stdio.h"
 #include "usart.h"
 extern UART_HandleTypeDef huart3;
+extern uint8_t ReceiveDataArray[8];
 
 
 
@@ -251,7 +252,7 @@ bool CANSPI_Initialize(uint8_t OSC_HZ, uint16_t kbps)
 
 
 /* Set Filter and Mask */
-uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filterNumber, uint32_t filterID)
+uint8_t CANSPI_SetMaskFilter(uint8_t maskNumber, uint32_t maskID, uint8_t filterNumber, uint32_t filterID)
 {
 	RXF0 RXF0reg;
 	RXF1 RXF1reg;
@@ -273,6 +274,12 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				RXM0reg.RXM0SIDL = ((maskID & 0x07) << 5)  | ((maskID >> 27) & 0x03);		// SID 2,1,0	EID 17,16
 				RXM0reg.RXM0EID8 = (maskID >> 19) & 0xFF;
 				RXM0reg.RXM0EID0 = (maskID >> 11) & 0xFF;
+				printf("MaskNumber : %d\r\n", maskNumber);
+				printf("MaskID : 0x%x\r\n", maskID);
+				printf("M0SIDH %x\r\n",RXM0reg.RXM0SIDH);
+				printf("M0SIDL %x\r\n",RXM0reg.RXM0SIDL);
+				printf("M0EID8 %x\r\n",RXM0reg.RXM0EID8);
+				printf("M0EID0 %x\r\n",RXM0reg.RXM0EID0);
 				break;
 		
 		
@@ -281,6 +288,10 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				RXM1reg.RXM1SIDL = ((maskID & 0x07) << 5)  | ((maskID >> 27) & 0x03);		// SID 2,1,0	EID 17,16
 				RXM1reg.RXM1EID8 = (maskID >> 19) & 0xFF;
 				RXM1reg.RXM1EID0 = (maskID >> 11) & 0xFF;
+				printf("M1SIDH %x\r\n",RXM1reg.RXM1SIDH);
+				printf("M1SIDL %x\r\n",RXM1reg.RXM1SIDL);
+				printf("M1EID8 %x\r\n",RXM1reg.RXM1EID8);
+				printf("M1EID0 %x\r\n",RXM1reg.RXM1EID0);
 				break;
 		}
 	}
@@ -298,18 +309,24 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				/* Extended */
 				if (filterID > 0x7FF)
 				{
-					RXF0reg.RXF0SIDH = (maskID >> 3) & 0xFF;			// SID 10~3
-					RXF0reg.RXF0SIDL = ((maskID & 0x07) << 5) | ((maskID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
-					RXF0reg.RXF0EID8 = (maskID >> 19) & 0xFF;
-					RXF0reg.RXF0EID0 = (maskID >> 11) & 0xFF;
+					RXF0reg.RXF0SIDH = (filterID >> 3) & 0xFF;			// SID 10~3
+					RXF0reg.RXF0SIDL = ((filterID & 0x07) << 5) | ((maskID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
+					RXF0reg.RXF0EID8 = (filterID >> 19) & 0xFF;
+					RXF0reg.RXF0EID0 = (filterID >> 11) & 0xFF;
 				}
 				else
 				{		
 					/* Standard */
 					//convertReg2StandardCANid(uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL);
-					RXF0reg.RXF0SIDH = (maskID >> 3) & 0xFF;
+					RXF0reg.RXF0SIDH = (filterID >> 3) & 0xFF;
 					RXF0reg.RXF0SIDL &= (~0xFF);
-					RXF0reg.RXF0SIDL = ((maskID & 0x07) << 5);
+					RXF0reg.RXF0SIDL = ((filterID & 0x07) << 5);
+					printf("filterNumber : %d\r\n", filterNumber);
+					printf("filterID : 0x%x\r\n", filterID);
+					printf("F0SIDH %x\r\n",RXF0reg.RXF0SIDH);
+					printf("F0SIDL %x\r\n",RXF0reg.RXF0SIDL);
+					printf("F0EID8 %x\r\n",RXF0reg.RXF0EID8);
+					printf("F0EID0 %x\r\n",RXF0reg.RXF0EID0);
 				}		
 				break;
 			
@@ -317,17 +334,17 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				/* Extended */
 				if (filterID > 0x7FF)
 				{
-					RXF1reg.RXF1SIDH = (maskID >> 3) & 0xFF;			// SID 10~3
-					RXF1reg.RXF1SIDL = ((maskID & 0x07) << 5) | ((maskID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
-					RXF1reg.RXF1EID8 = (maskID >> 19) & 0xFF;
-					RXF1reg.RXF1EID0 = (maskID >> 11) & 0xFF;
+					RXF1reg.RXF1SIDH = (filterID >> 3) & 0xFF;			// SID 10~3
+					RXF1reg.RXF1SIDL = ((filterID & 0x07) << 5) | ((filterID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
+					RXF1reg.RXF1EID8 = (filterID >> 19) & 0xFF;
+					RXF1reg.RXF1EID0 = (filterID >> 11) & 0xFF;
 				}
 				else
 				{		
 					/* Standard */
-					RXF1reg.RXF1SIDH = (maskID >> 3) & 0xFF;
+					RXF1reg.RXF1SIDH = (filterID >> 3) & 0xFF;
 					RXF1reg.RXF1SIDL &= (~0xFF);
-					RXF1reg.RXF1SIDL = ((maskID & 0x07) << 5);
+					RXF1reg.RXF1SIDL = ((filterID & 0x07) << 5);
 				}	
 				break;
 			
@@ -335,17 +352,17 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				/* Extended */
 				if (filterID > 0x7FF)
 				{
-					RXF2reg.RXF2SIDH = (maskID >> 3) & 0xFF;			// SID 10~3
-					RXF2reg.RXF2SIDL = ((maskID & 0x07) << 5) | ((maskID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
-					RXF2reg.RXF2EID8 = (maskID >> 19) & 0xFF;
-					RXF2reg.RXF2EID0 = (maskID >> 11) & 0xFF;
+					RXF2reg.RXF2SIDH = (filterID >> 3) & 0xFF;			// SID 10~3
+					RXF2reg.RXF2SIDL = ((filterID & 0x07) << 5) | ((filterID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
+					RXF2reg.RXF2EID8 = (filterID >> 19) & 0xFF;
+					RXF2reg.RXF2EID0 = (filterID >> 11) & 0xFF;
 				}
 				else
 				{		
 					/* Standard */
-					RXF2reg.RXF2SIDH = (maskID >> 3) & 0xFF;
+					RXF2reg.RXF2SIDH = (filterID >> 3) & 0xFF;
 					RXF2reg.RXF2SIDL &= (~0xFF);
-					RXF2reg.RXF2SIDL = ((maskID & 0x07) << 5);
+					RXF2reg.RXF2SIDL = ((filterID & 0x07) << 5);
 				}	
 				break;
 			
@@ -353,17 +370,17 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				/* Extended */
 				if (filterID > 0x7FF)
 				{
-					RXF3reg.RXF3SIDH = (maskID >> 3) & 0xFF;			// SID 10~3
-					RXF3reg.RXF3SIDL = ((maskID & 0x07) << 5) | ((maskID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
-					RXF3reg.RXF3EID8 = (maskID >> 19) & 0xFF;
-					RXF3reg.RXF3EID0 = (maskID >> 11) & 0xFF;
+					RXF3reg.RXF3SIDH = (filterID >> 3) & 0xFF;			// SID 10~3
+					RXF3reg.RXF3SIDL = ((filterID & 0x07) << 5) | ((filterID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
+					RXF3reg.RXF3EID8 = (filterID >> 19) & 0xFF;
+					RXF3reg.RXF3EID0 = (filterID >> 11) & 0xFF;
 				}
 				else
 				{		
 					/* Standard */
-					RXF3reg.RXF3SIDH = (maskID >> 3) & 0xFF;
+					RXF3reg.RXF3SIDH = (filterID >> 3) & 0xFF;
 					RXF3reg.RXF3SIDL &= (~0xFF);
-					RXF3reg.RXF3SIDL = ((maskID & 0x07) << 5);
+					RXF3reg.RXF3SIDL = ((filterID & 0x07) << 5);
 				}	
 				break;
 			
@@ -371,17 +388,17 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				/* Extended */
 				if (filterID > 0x7FF)
 				{
-					RXF3reg.RXF3SIDH = (maskID >> 3) & 0xFF;			// SID 10~3
-					RXF3reg.RXF3SIDL = ((maskID & 0x07) << 5) | ((maskID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
-					RXF3reg.RXF3EID8 = (maskID >> 19) & 0xFF;
-					RXF3reg.RXF3EID0 = (maskID >> 11) & 0xFF;
+					RXF3reg.RXF3SIDH = (filterID >> 3) & 0xFF;			// SID 10~3
+					RXF3reg.RXF3SIDL = ((filterID & 0x07) << 5) | ((filterID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
+					RXF3reg.RXF3EID8 = (filterID >> 19) & 0xFF;
+					RXF3reg.RXF3EID0 = (filterID >> 11) & 0xFF;
 				}
 				else
 				{		
 					/* Standard */
-					RXF4reg.RXF4SIDH = (maskID >> 3) & 0xFF;
+					RXF4reg.RXF4SIDH = (filterID >> 3) & 0xFF;
 					RXF4reg.RXF4SIDL &= (~0xFF);
-					RXF4reg.RXF4SIDL = ((maskID & 0x07) << 5);
+					RXF4reg.RXF4SIDL = ((filterID & 0x07) << 5);
 				}	
 				break;
 			
@@ -389,17 +406,17 @@ uint8_t CANSPI_SetFilterMask(uint8_t maskNumber, uint32_t maskID, uint8_t filter
 				/* Extended */
 				if (filterID > 0x7FF)
 				{
-					RXF5reg.RXF5SIDH = (maskID >> 3) & 0xFF;			// SID 10~3
-					RXF5reg.RXF5SIDL = ((maskID & 0x07) << 5) | ((maskID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
-					RXF5reg.RXF5EID8 = (maskID >> 19) & 0xFF;
-					RXF5reg.RXF5EID0 = (maskID >> 11) & 0xFF;
+					RXF5reg.RXF5SIDH = (filterID >> 3) & 0xFF;			// SID 10~3
+					RXF5reg.RXF5SIDL = ((filterID & 0x07) << 5) | ((filterID >> 27) & 0x03) + 0x08;		// SID 2,1,0,  (EXIDE = 1), EID 17,16
+					RXF5reg.RXF5EID8 = (filterID >> 19) & 0xFF;
+					RXF5reg.RXF5EID0 = (filterID >> 11) & 0xFF;
 				}
 				else
 				{		
 					/* Standard */
-					RXF5reg.RXF5SIDH = (maskID >> 3) & 0xFF;
+					RXF5reg.RXF5SIDH = (filterID >> 3) & 0xFF;
 					RXF5reg.RXF5SIDL &= (~0xFF);
-					RXF5reg.RXF5SIDL = ((maskID & 0x07) << 5);
+					RXF5reg.RXF5SIDL = ((filterID & 0x07) << 5);
 				}	
 				break;
 		}	
@@ -547,12 +564,12 @@ uint8_t CANSPI_Receive(uCAN_MSG *tempCanMsg)
 			tempCanMsg->frame.id		 = convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL);
 		}
 		
-		printf("%u\r\n", tempCanMsg->frame.idType);
+		printf("ID type  : %u\r\n", tempCanMsg->frame.idType);
 		printf("RXBnSIDH : %x\r\n", rxReg.RXBnSIDH);
 		printf("RXBnSIDL : %x\r\n", rxReg.RXBnSIDL);
-		printf("%u\r\n", convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL));
-		printf("%x\r\n", convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL));
-		printf("%x\r\n", tempCanMsg->frame.id);
+		printf("unsigned id :%u\r\n", convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL));
+		printf("id : 0x%x\r\n", convertReg2StandardCANid(rxReg.RXBnSIDH, rxReg.RXBnSIDL));
+		printf("id : 0x%x\r\n", tempCanMsg->frame.id);
 		
 		tempCanMsg->frame.dlc		= rxReg.RXBnDLC;
 		tempCanMsg->frame.data0 = rxReg.RXBnD0;
@@ -564,16 +581,16 @@ uint8_t CANSPI_Receive(uCAN_MSG *tempCanMsg)
 		tempCanMsg->frame.data6 = rxReg.RXBnD6;
 		tempCanMsg->frame.data7 = rxReg.RXBnD7;
 		
-
-		tempCanMsg->dataArray[0] = tempCanMsg->frame.data0;
-		tempCanMsg->dataArray[1] = tempCanMsg->frame.data1;
-		tempCanMsg->dataArray[2] = tempCanMsg->frame.data2;
-		tempCanMsg->dataArray[3] = tempCanMsg->frame.data3;
-		tempCanMsg->dataArray[4] = tempCanMsg->frame.data4;
-		tempCanMsg->dataArray[5] = tempCanMsg->frame.data5;
-		tempCanMsg->dataArray[6] = tempCanMsg->frame.data6;
-		tempCanMsg->dataArray[7] = tempCanMsg->frame.data7;
-
+		
+		ReceiveDataArray[0] = tempCanMsg->frame.data0;
+		ReceiveDataArray[1] = tempCanMsg->frame.data1;
+		ReceiveDataArray[2] = tempCanMsg->frame.data2;
+		ReceiveDataArray[3] = tempCanMsg->frame.data3;
+		ReceiveDataArray[4] = tempCanMsg->frame.data4;
+		ReceiveDataArray[5] = tempCanMsg->frame.data5;
+		ReceiveDataArray[6] = tempCanMsg->frame.data6;
+		ReceiveDataArray[7] = tempCanMsg->frame.data7;
+		
 		returnValue = 1;
 	}
 	
