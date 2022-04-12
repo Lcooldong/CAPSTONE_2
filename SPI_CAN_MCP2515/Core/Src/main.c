@@ -157,7 +157,7 @@ int main(void)
 	
   while (1)
   {
-		/*
+		
 		if(CANSPI_Receive(&rxMessage))
 		{
 			HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
@@ -194,7 +194,7 @@ int main(void)
 			printf("==========================\r\n");
 			
 		}
-		*/
+		
 		HAL_Delay(1000);
     /* USER CODE END WHILE */
 
@@ -220,7 +220,7 @@ void SystemClock_Config(void)
   * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -253,6 +253,8 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
 	if(CANSPI_Receive(&rxMessage))

@@ -3,7 +3,7 @@
 <title>Static Call Graph - [SPI_CAN_MCP2515\SPI_CAN_MCP2515.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image SPI_CAN_MCP2515\SPI_CAN_MCP2515.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Apr 11 12:26:04 2022
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Tue Apr 12 10:52:12 2022
 <BR><P>
 <H3>Maximum Stack Usage =        264 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -41,7 +41,7 @@ Function Pointers
  <LI><a href="#[19]">DMA1_Stream4_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[1a]">DMA1_Stream5_IRQHandler</a> from stm32f4xx_it.o(i.DMA1_Stream5_IRQHandler) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[1b]">DMA1_Stream6_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
- <LI><a href="#[39]">DMA1_Stream7_IRQHandler</a> from stm32f4xx_it.o(i.DMA1_Stream7_IRQHandler) referenced from startup_stm32f429xx.o(RESET)
+ <LI><a href="#[39]">DMA1_Stream7_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[63]">DMA2D_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[42]">DMA2_Stream0_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[43]">DMA2_Stream1_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
@@ -91,7 +91,7 @@ Function Pointers
  <LI><a href="#[60]">SAI1_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[3b]">SDIO_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[2d]">SPI1_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
- <LI><a href="#[2e]">SPI2_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
+ <LI><a href="#[2e]">SPI2_IRQHandler</a> from stm32f4xx_it.o(i.SPI2_IRQHandler) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[3d]">SPI3_IRQHandler</a> from stm32f4xx_it.o(i.SPI3_IRQHandler) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[5d]">SPI4_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
  <LI><a href="#[5e]">SPI5_IRQHandler</a> from startup_stm32f429xx.o(.text) referenced from startup_stm32f429xx.o(RESET)
@@ -210,6 +210,9 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
 <P><STRONG><a name="[1b]"></a>DMA1_Stream6_IRQHandler</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, startup_stm32f429xx.o(.text))
+<BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
+</UL>
+<P><STRONG><a name="[39]"></a>DMA1_Stream7_IRQHandler</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, startup_stm32f429xx.o(.text))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
 <P><STRONG><a name="[63]"></a>DMA2D_IRQHandler</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, startup_stm32f429xx.o(.text))
@@ -336,9 +339,6 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
 <P><STRONG><a name="[2d]"></a>SPI1_IRQHandler</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, startup_stm32f429xx.o(.text))
-<BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
-</UL>
-<P><STRONG><a name="[2e]"></a>SPI2_IRQHandler</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, startup_stm32f429xx.o(.text))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
 <P><STRONG><a name="[5d]"></a>SPI4_IRQHandler</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, startup_stm32f429xx.o(.text))
@@ -633,13 +633,6 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
-<P><STRONG><a name="[39]"></a>DMA1_Stream7_IRQHandler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.DMA1_Stream7_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = DMA1_Stream7_IRQHandler &rArr; HAL_DMA_IRQHandler
-</UL>
-<BR>[Calls]<UL><LI><a href="#[8b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_IRQHandler
-</UL>
-<BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
-</UL>
 <P><STRONG><a name="[7]"></a>DebugMon_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.DebugMon_Handler))
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
@@ -677,8 +670,7 @@ Global Symbols
 <P><STRONG><a name="[8b]"></a>HAL_DMA_IRQHandler</STRONG> (Thumb, 412 bytes, Stack size 32 bytes, stm32f4xx_hal_dma.o(i.HAL_DMA_IRQHandler))
 <BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = HAL_DMA_IRQHandler
 </UL>
-<BR>[Called By]<UL><LI><a href="#[39]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA1_Stream7_IRQHandler
-<LI><a href="#[1a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA1_Stream5_IRQHandler
+<BR>[Called By]<UL><LI><a href="#[1a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DMA1_Stream5_IRQHandler
 </UL>
 
 <P><STRONG><a name="[8f]"></a>HAL_DMA_Init</STRONG> (Thumb, 206 bytes, Stack size 24 bytes, stm32f4xx_hal_dma.o(i.HAL_DMA_Init))
@@ -905,6 +897,7 @@ Global Symbols
 <LI><a href="#[a7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Abort_IT
 </UL>
 <BR>[Called By]<UL><LI><a href="#[3d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI3_IRQHandler
+<LI><a href="#[2e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SPI2_IRQHandler
 </UL>
 
 <P><STRONG><a name="[a9]"></a>HAL_SPI_Init</STRONG> (Thumb, 188 bytes, Stack size 16 bytes, stm32f4xx_hal_spi.o(i.HAL_SPI_Init))
@@ -916,7 +909,7 @@ Global Symbols
 <LI><a href="#[e5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_SPI2_Init
 </UL>
 
-<P><STRONG><a name="[aa]"></a>HAL_SPI_MspInit</STRONG> (Thumb, 168 bytes, Stack size 40 bytes, spi.o(i.HAL_SPI_MspInit))
+<P><STRONG><a name="[aa]"></a>HAL_SPI_MspInit</STRONG> (Thumb, 180 bytes, Stack size 40 bytes, spi.o(i.HAL_SPI_MspInit))
 <BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = HAL_SPI_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
@@ -981,7 +974,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[b1]"></a>HAL_TIM_Base_Init</STRONG> (Thumb, 90 bytes, Stack size 8 bytes, stm32f4xx_hal_tim.o(i.HAL_TIM_Base_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
+<BR><BR>[Stack]<UL><LI>Max Depth = 88<LI>Call Chain = HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b2]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_MspInit
 <LI><a href="#[b3]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TIM_Base_SetConfig
@@ -991,8 +984,8 @@ Global Symbols
 <LI><a href="#[e7]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM3_Init
 </UL>
 
-<P><STRONG><a name="[b2]"></a>HAL_TIM_Base_MspInit</STRONG> (Thumb, 256 bytes, Stack size 56 bytes, tim.o(i.HAL_TIM_Base_MspInit))
-<BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
+<P><STRONG><a name="[b2]"></a>HAL_TIM_Base_MspInit</STRONG> (Thumb, 234 bytes, Stack size 40 bytes, tim.o(i.HAL_TIM_Base_MspInit))
+<BR><BR>[Stack]<UL><LI>Max Depth = 80<LI>Call Chain = HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[8f]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_DMA_Init
 <LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
@@ -1266,7 +1259,7 @@ Global Symbols
 <LI><a href="#[7e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;CANSPI_Initialize
 </UL>
 
-<P><STRONG><a name="[e0]"></a>MX_DMA_Init</STRONG> (Thumb, 56 bytes, Stack size 8 bytes, dma.o(i.MX_DMA_Init))
+<P><STRONG><a name="[e0]"></a>MX_DMA_Init</STRONG> (Thumb, 40 bytes, Stack size 8 bytes, dma.o(i.MX_DMA_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = MX_DMA_Init &rArr; HAL_NVIC_SetPriority
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
@@ -1275,7 +1268,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[e1]"></a>MX_GPIO_Init</STRONG> (Thumb, 428 bytes, Stack size 64 bytes, gpio.o(i.MX_GPIO_Init))
+<P><STRONG><a name="[e1]"></a>MX_GPIO_Init</STRONG> (Thumb, 452 bytes, Stack size 64 bytes, gpio.o(i.MX_GPIO_Init))
 <BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = MX_GPIO_Init &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[a0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_NVIC_SetPriority
@@ -1316,8 +1309,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[64]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[e7]"></a>MX_TIM3_Init</STRONG> (Thumb, 160 bytes, Stack size 48 bytes, tim.o(i.MX_TIM3_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = MX_TIM3_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
+<P><STRONG><a name="[e7]"></a>MX_TIM3_Init</STRONG> (Thumb, 164 bytes, Stack size 48 bytes, tim.o(i.MX_TIM3_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 136<LI>Call Chain = MX_TIM3_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_IC_Init
 <LI><a href="#[ba]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_IC_ConfigChannel
@@ -1330,7 +1323,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[e9]"></a>MX_TIM4_Init</STRONG> (Thumb, 146 bytes, Stack size 64 bytes, tim.o(i.MX_TIM4_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 168<LI>Call Chain = MX_TIM4_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
+<BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = MX_TIM4_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_Init
 <LI><a href="#[c8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PWM_ConfigChannel
@@ -1345,7 +1338,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[ea]"></a>MX_TIM7_Init</STRONG> (Thumb, 58 bytes, Stack size 16 bytes, tim.o(i.MX_TIM7_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 120<LI>Call Chain = MX_TIM7_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
+<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = MX_TIM7_Init &rArr; HAL_TIM_Base_Init &rArr; HAL_TIM_Base_MspInit &rArr; HAL_GPIO_Init
 </UL>
 <BR>[Calls]<UL><LI><a href="#[b1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_Base_Init
 <LI><a href="#[e8]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIMEx_MasterConfigSynchronization
@@ -1378,6 +1371,13 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
 <P><STRONG><a name="[8]"></a>PendSV_Handler</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.PendSV_Handler))
+<BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
+</UL>
+<P><STRONG><a name="[2e]"></a>SPI2_IRQHandler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.SPI2_IRQHandler))
+<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = SPI2_IRQHandler &rArr; HAL_SPI_IRQHandler
+</UL>
+<BR>[Calls]<UL><LI><a href="#[a6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_SPI_IRQHandler
+</UL>
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f429xx.o(RESET)
 </UL>
 <P><STRONG><a name="[3d]"></a>SPI3_IRQHandler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f4xx_it.o(i.SPI3_IRQHandler))

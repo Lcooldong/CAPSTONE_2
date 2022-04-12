@@ -272,24 +272,24 @@ int main(void)
 	EnablePulse();
   DWT_Delay_us(4000);
 	
-	uint8_t day = 1;
+	uint8_t day = 0;
 	uint8_t hour = 0;
 	uint8_t minute = 0;
 	uint8_t second = 0;
-	char Buffer[17];
-	char timeArray[17] = "";
+	uint8_t Buffer[17];
+//	char timeArray[17] = "";
 	
 	uint32_t currentTime;
 	uint32_t lastTime;
 	uint16_t timeInterval = 1000; 	// 1 second
 	
-	sprintf(Buffer, "%2d h %2d m %2d s", hour, minute, second);
+	sprintf((char *)Buffer, "%2d h %2d m %2d s", hour, minute, second);
 	Locate(0, 2);
-	DispString(Buffer);
+	DispString((char*)Buffer);
 	
-	DispString(timeArray);
-	enum WEEK week;
-	enum MONTH month;
+//	DispString(timeArray);
+//	enum WEEK week;
+//	enum MONTH month;
   while (1)
   {		
 			currentTime = HAL_GetTick();
@@ -315,8 +315,14 @@ int main(void)
 				}
 				
 				Locate(0, 2);
-				sprintf(Buffer, "%2d h %2d m %2d s", hour, minute, second);
-				DispString(Buffer);
+				sprintf((char *)Buffer, "%2d h %2d m %2d s", hour, minute, second);
+					
+				
+				DispString((char *)Buffer);
+				
+				Locate(1, 4);
+				sprintf((char *)Buffer, "DAY : %d", day);
+				DispString((char *)Buffer);
 			}
     /* USER CODE END WHILE */
 		
