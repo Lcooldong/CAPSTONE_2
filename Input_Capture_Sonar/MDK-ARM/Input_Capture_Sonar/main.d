@@ -35,4 +35,5 @@ input_capture_sonar\main.o: ../Core/Inc/dma.h
 input_capture_sonar\main.o: ../Core/Inc/tim.h
 input_capture_sonar\main.o: ../Core/Inc/usart.h
 input_capture_sonar\main.o: ../Core/Inc/gpio.h
+input_capture_sonar\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 input_capture_sonar\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h

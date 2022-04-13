@@ -132,7 +132,7 @@ int main(void)
 		{
 			//  GPIOF->ODR &= ~0x02;
 		}
-		HAL_Delay(500);
+		//HAL_Delay(500);
 
     /* USER CODE BEGIN 3 */
   }

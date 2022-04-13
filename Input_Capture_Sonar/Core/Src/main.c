@@ -25,6 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stdio.h"
 #include "stdbool.h"
 /* USER CODE END Includes */
 
@@ -51,12 +52,21 @@ uint32_t period, active, freq, duty;
 bool ch1captureFlag = false;
 bool ch2captureFlag = false;
 
+struct __FILE {
+    int dummy;
+};
+FILE __stdout;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
+int fputc(int ch, FILE *f);
+uint32_t DWT_Delay_Init(void);
+void DWT_Delay_us(volatile uint32_t microseconds);
+void TriggerEnable(void);
 
 /* USER CODE END PFP */
 
@@ -99,6 +109,10 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 	// timer, channel, array, quantity 
+	DWT_Delay_Init();
+	HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
+	
 	HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_1, (uint32_t *)capture1, 2);
 	htim3.State = HAL_TIM_STATE_READY;
 	HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_2, (uint32_t *)capture2, 2);
@@ -111,7 +125,7 @@ int main(void)
 		/*   */
 		if(ch1captureFlag)
 		{
-				/* capture after first time */
+				/* [0] - [1] */
 				if(capture1[0] > capture1[1])
 				{
 					// 
@@ -119,7 +133,7 @@ int main(void)
 				}
 				else
 				{
-					/* first time */
+					/* [1] - [0] */
 					period = capture1[1] - capture1[0];
 				}
 				
@@ -148,6 +162,8 @@ int main(void)
 				
 				ch2captureFlag = false;
 		}
+		
+		
 		
     /* USER CODE END WHILE */
 
@@ -206,6 +222,20 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	GPIOB->ODR |= 0x01 << 6;  // PB 6 SET
+	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
+}
+
+void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	GPIOB->ODR &= ~(0x01 << 6);	// PB 6	RESET
+	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+}
+
+
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	// reload to capture Edge
@@ -220,6 +250,65 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	}
 	
 }
+
+int fputc(int ch, FILE *f)
+{
+  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 0xFFFF); 
+
+  return ch;
+}
+
+uint32_t DWT_Delay_Init(void)
+{
+  /* Disable TRC */
+  CoreDebug->DEMCR &= ~CoreDebug_DEMCR_TRCENA_Msk; // ~0x01000000;
+  /* Enable TRC */
+  CoreDebug->DEMCR |=  CoreDebug_DEMCR_TRCENA_Msk; // 0x01000000;
+
+  /* Disable clock cycle counter */
+  DWT->CTRL &= ~DWT_CTRL_CYCCNTENA_Msk; //~0x00000001;
+  /* Enable  clock cycle counter */
+  DWT->CTRL |=  DWT_CTRL_CYCCNTENA_Msk; //0x00000001;
+
+  /* Reset the clock cycle counter value */
+  DWT->CYCCNT = 0;
+
+     /* 3 NO OPERATION instructions */
+     __ASM volatile ("NOP");
+     __ASM volatile ("NOP");
+  __ASM volatile ("NOP");
+
+  /* Check if clock cycle counter has started */
+     if(DWT->CYCCNT)
+     {
+       return 0; /*clock cycle counter started*/
+     }
+     else
+  {
+    return 1; /*clock cycle counter not started*/
+  }
+}
+
+void DWT_Delay_us(volatile uint32_t microseconds)
+{
+  uint32_t clk_cycle_start = DWT->CYCCNT;
+
+  /* Go to number of cycles for system */
+  microseconds *= (HAL_RCC_GetHCLKFreq() / 1000000);
+
+  /* Delay till end */
+  while ((DWT->CYCCNT - clk_cycle_start) < microseconds);
+}
+
+void TriggerEnable(void)
+{
+	GPIOB->ODR &= ~TRIGGER_Pin;	// initialize
+	DWT_Delay_us(2);	
+	GPIOB->ODR |= TRIGGER_Pin;	// Trigger signal
+	DWT_Delay_us(11);
+	GPIOB->ODR &= ~TRIGGER_Pin;	// shut down
+}
+
 /* USER CODE END 4 */
 
 /**
