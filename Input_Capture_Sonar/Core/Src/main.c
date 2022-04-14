@@ -63,7 +63,12 @@ FILE __stdout;
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 
-int fputc(int ch, FILE *f);
+int fputc(int ch, FILE *f)
+{
+  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 0xFFFF); 
+
+  return ch;
+}
 uint32_t DWT_Delay_Init(void);
 void DWT_Delay_us(volatile uint32_t microseconds);
 void TriggerEnable(void);
@@ -114,8 +119,10 @@ int main(void)
   HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
 	
 	HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_1, (uint32_t *)capture1, 2);
-	htim3.State = HAL_TIM_STATE_READY;
-	HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_2, (uint32_t *)capture2, 2);
+	//htim3.State = HAL_TIM_STATE_READY;
+	//HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_2, (uint32_t *)capture2, 2);
+	printf("start the program\r\n");
+	HAL_Delay(2000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -162,7 +169,7 @@ int main(void)
 				
 				ch2captureFlag = false;
 		}
-		
+		printf("freq : %.8lf\r\nduty : %.8lf\r\n", (double)freq, (double)duty );
 		
 		
     /* USER CODE END WHILE */
@@ -251,12 +258,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 	
 }
 
-int fputc(int ch, FILE *f)
-{
-  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, 0xFFFF); 
-
-  return ch;
-}
 
 uint32_t DWT_Delay_Init(void)
 {
