@@ -46,9 +46,12 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint16_t capture1[4];
-//uint16_t capture2[4];
+uint16_t capture1[2];
+uint16_t capture2[2];
+uint8_t capture1CNT = 0;
 uint32_t period, active, freq, duty;
+uint16_t width, DMAwidth = 0;
+uint16_t distance, DMAdistance = 0;
 bool ch1captureFlag = false;
 bool ch2captureFlag = false;
 
@@ -109,17 +112,24 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM3_Init();
-  MX_DMA_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
+  MX_DMA_Init();
   MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
 	// timer, channel, array, quantity 
 	DWT_Delay_Init();
-	HAL_TIM_Base_Start_IT(&htim4);
-  HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);
+	// HAL_TIM_PeriodElapsedCallback
+	HAL_TIM_Base_Start_IT(&htim4);	// Sonar
+	HAL_TIM_Base_Start_IT(&htim12);	
 	
-	HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_1, (uint32_t *)capture1, 4);
+	// HAL_TIM_OC_DelayElapsedCallback
+  HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);		// Sonar		
+	
+	// HAL_TIM_IC_CaptureCallback
+	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);		
+	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
+	HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_3, (uint32_t *)capture2, 2);
 	//htim3.State = HAL_TIM_STATE_READY;
 	//HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_2, (uint32_t *)capture2, 2);
 	printf("start the program\r\n");
@@ -130,20 +140,17 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-		if(capture1[0] > capture1[2])
-		{
-			period = TIM3->ARR - capture1[2] + capture1[0];
-		}
-		else
-		{
-			period = capture1[2] - capture1[0];
-		}
+
+		HAL_Delay(100);
+		freq = (HAL_RCC_GetPCLK1Freq()*2)/(htim3.Instance->PSC + 1);	// (45MHz*2) / 90 = 1MHz = 1,000,000 Hz
+		//printf("freq: %u capture1[0] : %u  capture1[1] : %u\r\n", freq, capture1[0], capture1[1]);
+		printf("%5d-%5d => distance %4d cm, DMAdistance %4d cm\r\n", capture1[0], capture1[1], distance, DMAdistance);
+		printf("CCER : 0x%x  %u %lu\r\n", TIM3->CCER, TIM_INPUTCHANNELPOLARITY_RISING, TIM_CCER_CC1P);
 		
 		// (90MHz * 2)/(89 + 1)
-		freq = (HAL_RCC_GetPCLK1Freq()*2)/(htim3.Instance->PSC + 1);
-		freq = freq/period;
+		//
+		//freq = freq/period;
 		
-		duty = ;
 		
     /* USER CODE END WHILE */
 
@@ -205,49 +212,74 @@ void SystemClock_Config(void)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim->Instance == TIM3)
+	if(htim->Instance == TIM4)
 	{
 		GPIOB->ODR |= 0x01 << 6;  // PB 6 SET
-	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 	}
 	else if(htim->Instance == TIM12)
 	{
-		printf("period : %d\r\nduty : %d\r\n", period, duty);
+
 	}
-	
 }
 
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	GPIOB->ODR &= ~(0x01 << 6);	// PB 6	RESET
-	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
+	GPIOB->ODR &= ~(0x01 << 6);	// PB 6	RESET, Pulse
 }
 
 
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
-	if(TIM3->CCER == 0)
-	{
-		TIM3->CCER |= TIM_CCER_CC1P;		// Rising -> Falling 
-	}
-	else
-	{
-		TIM3->CCER &= ~TIM_CCER_CC1P;		// Falling -> Rising
-	}
-	
-	
-	
-	// reload to capture Edge
+
+	/* ReadCapturedValue */
 	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 	{
-		ch1captureFlag = true;
+		capture1[0] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+
 	}
-	
 	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
 	{
-		ch2captureFlag = true;
+		capture1[1] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+		
+		if(capture1[0] > capture1[1])
+		{
+			width = TIM3->ARR - capture1[0] + capture1[1];
+			GPIOB->ODR |= LD2_Pin;
+		}
+		else
+		{
+			width = capture1[1] - capture1[0];
+		}
+		
+		distance = width / 58;
 	}
+	
+	
+	/* DMA */
+	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
+	{
+		if((TIM3->CCER & TIM_CCER_CC3P) != 1)
+		{
+			TIM3->CCER |= TIM_CCER_CC3P;		// Rising -> Falling (0 -> 2)
+		}
+		else
+		{
+			TIM3->CCER &= ~TIM_CCER_CC3P;		// Falling -> Rising	(2 -> 0)
+		}
+		
+		if(capture2[0] > capture2[1])
+		{
+			DMAwidth = TIM3->ARR - capture2[0] + capture2[1];
+		}
+		else
+		{
+			DMAwidth = capture2[1] - capture2[0];
+		}
+		DMAdistance = DMAwidth / 58;
+	}
+	
+
 	
 }
 
