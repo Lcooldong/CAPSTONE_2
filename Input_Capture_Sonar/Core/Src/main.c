@@ -47,7 +47,7 @@
 
 /* USER CODE BEGIN PV */
 uint16_t capture1[2];
-uint16_t capture2[2];
+volatile uint16_t capture2[2];
 uint8_t capture1CNT = 0;
 uint32_t period, active, freq, duty;
 uint16_t width, DMAwidth = 0;
@@ -129,7 +129,8 @@ int main(void)
 	// HAL_TIM_IC_CaptureCallback
 	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);		
 	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
-	HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_3, (uint32_t *)capture2, 2);
+
+	//HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_3, (uint32_t *)capture2, 2);;
 	//htim3.State = HAL_TIM_STATE_READY;
 	//HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_2, (uint32_t *)capture2, 2);
 	printf("start the program\r\n");
@@ -144,8 +145,10 @@ int main(void)
 		HAL_Delay(100);
 		freq = (HAL_RCC_GetPCLK1Freq()*2)/(htim3.Instance->PSC + 1);	// (45MHz*2) / 90 = 1MHz = 1,000,000 Hz
 		//printf("freq: %u capture1[0] : %u  capture1[1] : %u\r\n", freq, capture1[0], capture1[1]);
-		printf("%5d-%5d => distance %4d cm, DMAdistance %4d cm\r\n", capture1[0], capture1[1], distance, DMAdistance);
-		printf("CCER : 0x%x  %u %lu\r\n", TIM3->CCER, TIM_INPUTCHANNELPOLARITY_RISING, TIM_CCER_CC1P);
+		
+		if(distance > 400) distance = 400;
+		printf("%5d-%5d => distance %4d cm\r\n", capture1[0], capture1[1], distance);
+//printf("CCER : 0x%x  %u %lu\r\n", TIM3->CCER, TIM_INPUTCHANNELPOLARITY_RISING, TIM_CCER_CC1P);
 		
 		// (90MHz * 2)/(89 + 1)
 		//
@@ -245,7 +248,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		if(capture1[0] > capture1[1])
 		{
 			width = TIM3->ARR - capture1[0] + capture1[1];
-			GPIOB->ODR |= LD2_Pin;
+			GPIOB->ODR |= LD1_Pin;
 		}
 		else
 		{
@@ -255,31 +258,6 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		distance = width / 58;
 	}
 	
-	
-	/* DMA */
-	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)
-	{
-		if((TIM3->CCER & TIM_CCER_CC3P) != 1)
-		{
-			TIM3->CCER |= TIM_CCER_CC3P;		// Rising -> Falling (0 -> 2)
-		}
-		else
-		{
-			TIM3->CCER &= ~TIM_CCER_CC3P;		// Falling -> Rising	(2 -> 0)
-		}
-		
-		if(capture2[0] > capture2[1])
-		{
-			DMAwidth = TIM3->ARR - capture2[0] + capture2[1];
-		}
-		else
-		{
-			DMAwidth = capture2[1] - capture2[0];
-		}
-		DMAdistance = DMAwidth / 58;
-	}
-	
-
 	
 }
 
