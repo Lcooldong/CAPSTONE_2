@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -46,14 +45,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-uint16_t capture1[2];
-volatile uint16_t capture2[2];
-uint8_t capture1CNT = 0;
-uint32_t period, active, freq, duty;
-uint16_t width, DMAwidth = 0;
-uint16_t distance, DMAdistance = 0;
-bool ch1captureFlag = false;
-bool ch2captureFlag = false;
+volatile uint16_t risingCapture[2];
+volatile uint16_t fallingCapture[2];
+uint8_t risingCNT = 0;
+uint8_t fallingCNT = 0;
+uint32_t period, freq, duty;
+uint16_t width, distance;
+
+
 
 struct __FILE {
     int dummy;
@@ -114,14 +113,11 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_USART3_UART_Init();
-  MX_DMA_Init();
-  MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
 	// timer, channel, array, quantity 
 	DWT_Delay_Init();
 	// HAL_TIM_PeriodElapsedCallback
 	HAL_TIM_Base_Start_IT(&htim4);	// Sonar
-	HAL_TIM_Base_Start_IT(&htim12);	
 	
 	// HAL_TIM_OC_DelayElapsedCallback
   HAL_TIM_OC_Start_IT(&htim4, TIM_CHANNEL_1);		// Sonar		
@@ -130,9 +126,6 @@ int main(void)
 	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);		
 	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_2);
 
-	//HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_3, (uint32_t *)capture2, 2);;
-	//htim3.State = HAL_TIM_STATE_READY;
-	//HAL_TIM_IC_Start_DMA(&htim3, TIM_CHANNEL_2, (uint32_t *)capture2, 2);
 	printf("start the program\r\n");
 	HAL_Delay(2000);
   /* USER CODE END 2 */
@@ -143,18 +136,9 @@ int main(void)
   {
 
 		HAL_Delay(100);
-		freq = (HAL_RCC_GetPCLK1Freq()*2)/(htim3.Instance->PSC + 1);	// (45MHz*2) / 90 = 1MHz = 1,000,000 Hz
-		//printf("freq: %u capture1[0] : %u  capture1[1] : %u\r\n", freq, capture1[0], capture1[1]);
-		
-		if(distance > 400) distance = 400;
-		printf("%5d-%5d => distance %4d cm\r\n", capture1[0], capture1[1], distance);
-//printf("CCER : 0x%x  %u %lu\r\n", TIM3->CCER, TIM_INPUTCHANNELPOLARITY_RISING, TIM_CCER_CC1P);
-		
-		// (90MHz * 2)/(89 + 1)
-		//
-		//freq = freq/period;
-		
-		
+			
+		printf("[%5d, %5d]-%5d = %5d => Distance %4d cm| period : %6d | freq : %3d Hz| duty : %d %%\r\n", risingCapture[0], risingCapture[1], fallingCapture[0], width ,distance, period , freq, duty);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -219,15 +203,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		GPIOB->ODR |= 0x01 << 6;  // PB 6 SET
 	}
-	else if(htim->Instance == TIM12)
-	{
-
-	}
 }
 
 void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	GPIOB->ODR &= ~(0x01 << 6);	// PB 6	RESET, Pulse
+	if(htim->Instance == TIM4)
+	{
+		GPIOB->ODR &= ~(0x01 << 6);	// PB 6	RESET, Pulse
+	}
 }
 
 
@@ -235,30 +218,66 @@ void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 
-	/* ReadCapturedValue */
+	/* Rising */
 	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
 	{
-		capture1[0] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 
-	}
-	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
-	{
-		capture1[1] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-		
-		if(capture1[0] > capture1[1])
-		{
-			width = TIM3->ARR - capture1[0] + capture1[1];
-			GPIOB->ODR |= LD1_Pin;
+		risingCapture[risingCNT] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+		if(risingCNT == 1){
+			risingCNT = 0;
+			if(risingCapture[0] > risingCapture[1])
+			{
+				period = TIM3->ARR - risingCapture[0] + risingCapture[1];
+			}
+			else
+			{
+				period = risingCapture[1] - risingCapture[0];
+			}
+			GPIOB->ODR |= LD3_Pin;
+			period += TIM3->ARR;	// 65535 + 34000 =>  sonar PSC 150 rising PSC 90
 		}
 		else
 		{
-			width = capture1[1] - capture1[0];
+			risingCNT = 1;
+			GPIOB->ODR &= ~LD3_Pin;
 		}
+		GPIOB->ODR |= LD1_Pin;
+		GPIOB->ODR &= ~LD2_Pin;
 		
-		distance = width / 58;
+		freq = (HAL_RCC_GetPCLK1Freq()*2)/(htim3.Instance->PSC + 1);	// (45MHz*2) / 90 = 1MHz = 1,000,000 Hz
+		freq = freq/period;
+		
+
 	}
 	
+	/* Falling */
+	if(htim->Instance == TIM3 && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
+	{
+		fallingCapture[fallingCNT] = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+		if(fallingCNT == 1){
+			fallingCNT = 0;
+		}else{
+			fallingCNT = 1;
+		}
+		
+		if(fallingCapture[0] >= risingCapture[0] && fallingCapture[0] <= risingCapture[1])
+		{
+			width = fallingCapture[0] - risingCapture[0];
+			
+		}
+		else if(fallingCapture[1] >= risingCapture[0] && fallingCapture[1] <= risingCapture[1])
+		{
+			width = fallingCapture[1] - risingCapture[0];
+		}
+		GPIOB->ODR &= ~LD1_Pin;
+		GPIOB->ODR |= LD2_Pin;
+
+		distance = width / 58;
+		if(distance > 400) distance = 400;
+		
+		duty = width * 100/period;
 	
+	}
 }
 
 

@@ -2,7 +2,6 @@
 "input_capture_sonar\startup_stm32f429xx.o"
 "input_capture_sonar\main.o"
 "input_capture_sonar\gpio.o"
-"input_capture_sonar\dma.o"
 "input_capture_sonar\tim.o"
 "input_capture_sonar\usart.o"
 "input_capture_sonar\stm32f4xx_it.o"

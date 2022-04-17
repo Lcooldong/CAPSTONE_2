@@ -31,7 +31,6 @@ input_capture_sonar\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pw
 input_capture_sonar\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h
 input_capture_sonar\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h
 input_capture_sonar\main.o: ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h
-input_capture_sonar\main.o: ../Core/Inc/dma.h
 input_capture_sonar\main.o: ../Core/Inc/tim.h
 input_capture_sonar\main.o: ../Core/Inc/usart.h
 input_capture_sonar\main.o: ../Core/Inc/gpio.h
