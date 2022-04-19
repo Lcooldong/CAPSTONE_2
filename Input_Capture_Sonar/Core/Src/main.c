@@ -228,12 +228,13 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 			if(risingCapture[0] > risingCapture[1])
 			{
 				period = TIM3->ARR - risingCapture[0] + risingCapture[1];
+				GPIOB->ODR |= LD3_Pin;
 			}
 			else
 			{
 				period = risingCapture[1] - risingCapture[0];
 			}
-			GPIOB->ODR |= LD3_Pin;
+			
 			period += TIM3->ARR;	// 65535 + 34000 =>  sonar PSC 150 rising PSC 90
 		}
 		else
