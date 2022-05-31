@@ -298,16 +298,16 @@ uint32_t DWT_Delay_Init(void)
   DWT->CYCCNT = 0;
 
      /* 3 NO OPERATION instructions */
-     __ASM volatile ("NOP");
-     __ASM volatile ("NOP");
+  __ASM volatile ("NOP");
+  __ASM volatile ("NOP");
   __ASM volatile ("NOP");
 
   /* Check if clock cycle counter has started */
-     if(DWT->CYCCNT)
-     {
-       return 0; /*clock cycle counter started*/
-     }
-     else
+  if(DWT->CYCCNT)
+  {
+		return 0; /*clock cycle counter started*/
+  }
+		else
   {
     return 1; /*clock cycle counter not started*/
   }
